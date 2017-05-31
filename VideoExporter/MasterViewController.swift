@@ -1,35 +1,22 @@
-//
-//  MasterViewController.swift
-//  VideoExporter
-//
-//  Created by Sergio Estevao on 29/05/2017.
-//  Copyright © 2017 Sergio Estevao. All rights reserved.
-//
-
 import UIKit
+import MobileCoreServices
+import Photos
+import AVKit
 
-class MasterViewController: UITableViewController {
+class MasterViewController: UITableViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
 
-    var detailViewController: DetailViewController? = nil
-    var objects = [Any]()
-
+    var objects = [VideoExporter]()
+    let exportQueue = DispatchQueue(label: "video export queue")
+    var exportItems = [VideoExporter]()
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
-        navigationItem.leftBarButtonItem = editButtonItem
 
         let addButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(insertNewObject(_:)))
         navigationItem.rightBarButtonItem = addButton
-        if let split = splitViewController {
-            let controllers = split.viewControllers
-            detailViewController = (controllers[controllers.count-1] as! UINavigationController).topViewController as? DetailViewController
-        }
-    }
 
-    override func viewWillAppear(_ animated: Bool) {
-        clearsSelectionOnViewWillAppear = splitViewController!.isCollapsed
-        super.viewWillAppear(animated)
+        let shareButton = UIBarButtonItem(barButtonSystemItem: .action, target: self, action: #selector(share(_:)))
+        navigationItem.leftBarButtonItem = shareButton
     }
 
     override func didReceiveMemoryWarning() {
@@ -38,23 +25,33 @@ class MasterViewController: UITableViewController {
     }
 
     func insertNewObject(_ sender: Any) {
-        objects.insert(NSDate(), at: 0)
-        let indexPath = IndexPath(row: 0, section: 0)
-        tableView.insertRows(at: [indexPath], with: .automatic)
+        let mediaPicker = UIImagePickerController()
+        mediaPicker.mediaTypes = [kUTTypeMovie as String]
+        mediaPicker.videoQuality = .typeLow
+        mediaPicker.delegate = self
+        self.present(mediaPicker, animated: true, completion: nil)
     }
 
-    // MARK: - Segues
+    func share(_ sender: Any) {
+        let csvFileURL = saveExportResults()
 
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == "showDetail" {
-            if let indexPath = tableView.indexPathForSelectedRow {
-                let object = objects[indexPath.row] as! NSDate
-                let controller = (segue.destination as! UINavigationController).topViewController as! DetailViewController
-                controller.detailItem = object
-                controller.navigationItem.leftBarButtonItem = splitViewController?.displayModeButtonItem
-                controller.navigationItem.leftItemsSupplementBackButton = true
+        let activityViewController = UIActivityViewController(activityItems:[csvFileURL], applicationActivities:nil)
+        activityViewController.popoverPresentationController?.barButtonItem = self.navigationItem.rightBarButtonItem
+        self.present(activityViewController, animated:true, completion:nil);
+    }
+
+    func saveExportResults() -> URL {
+        let fileURL = URL.URLForTemporaryFileWithFilename("IOS Video Transcoding Stats.csv")!
+        var text = "Preset, Width (px), Height (px), Size (MB), Time (s)\n"
+
+        for exporter in objects {
+            guard exporter.exportSession?.status == .completed else {
+                continue
             }
+            text += "\(exporter.preset.replacingOccurrences(of: "AVAssetExportPreset", with: "")),\(exporter.exportURL.pixelSize.width),\(exporter.exportURL.pixelSize.height), \(exporter.exportURL.fileSize!.doubleValue / (1024.0*1024.0)), \(exporter.timeToExport)\n"
         }
+        try? text.write(to: fileURL, atomically: true, encoding: .utf8)
+        return fileURL
     }
 
     // MARK: - Table View
@@ -70,8 +67,22 @@ class MasterViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
 
-        let object = objects[indexPath.row] as! NSDate
-        cell.textLabel!.text = object.description
+        let object = objects[indexPath.row]
+        var text = object.preset.replacingOccurrences(of: "AVAssetExportPreset", with: "")
+        text += " " + object.status
+        text += " \(percentFormatter.string(from:NSNumber(value: object.progress))!)"
+        var detail: String = ""
+        if let fileSize = object.resultFileSize {
+            detail += "size: \(ByteCountFormatter.string(fromByteCount: fileSize.int64Value, countStyle: ByteCountFormatter.CountStyle.file)) "
+        }
+        if let pixelSize = object.resultPixelSize {
+            detail += "resolution: \(NSStringFromCGSize(pixelSize)) "
+        }
+        if object.timeToExport != 0 {
+            detail += "time: \(timeIntervalFormatter.string(from: object.timeToExport)!)"
+        }
+        cell.textLabel!.text = text
+        cell.detailTextLabel!.text = detail
         return cell
     }
 
@@ -89,6 +100,83 @@ class MasterViewController: UITableViewController {
         }
     }
 
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let exporter = objects[indexPath.row]
+        if (exporter.status == "Completed") {
+            let playerViewController = AVPlayerViewController()
+            playerViewController.player = AVPlayer(url: exporter.exportURL)
+            self.present(playerViewController, animated: true, completion: nil)
+        }
+    }
 
+    func startExportOf(asset: PHAsset) {
+        let presets = [AVAssetExportPresetPassthrough, AVAssetExportPresetHighestQuality, AVAssetExportPresetMediumQuality, AVAssetExportPresetLowQuality, AVAssetExportPreset1920x1080, AVAssetExportPreset1280x720, AVAssetExportPreset960x540]
+        for preset in presets {
+            guard let tempURL = URL.URLForTemporaryFileWithFilename(asset.originalFilename() ?? "Unknow") else {
+                continue
+            }
+            let position = objects.count
+            let videoExporter = VideoExporter(asset: asset, preset: preset, destinationURL: tempURL,
+                                              successHandler: { () in
+                self.nextItem()
+            }, progressHandler: { (progress) in
+                DispatchQueue.main.async {
+                    self.tableView.reloadRows(at: [IndexPath(row:position, section:0)], with: .none)
+                }
+            }, errorHandler: { (error) in
+                self.nextItem()
+            })
+            objects.append(videoExporter)
+            exportItems.append(videoExporter)
+        }
+        nextItem()
+        self.tableView.reloadData()
+    }
+
+    func nextItem() {
+        self.exportQueue.async {
+            if self.exportItems.isEmpty {
+                return
+            }
+            let exporter = self.exportItems.removeFirst()
+            exporter.export()
+        }
+        DispatchQueue.main.async {
+            self.tableView.reloadData()
+        }
+    }
+
+    lazy var percentFormatter: NumberFormatter = {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = NumberFormatter.Style.percent
+        return formatter
+    }()
+
+    lazy var timeIntervalFormatter: DateComponentsFormatter = {
+        let formatter = DateComponentsFormatter()
+        formatter.unitsStyle = .abbreviated
+        formatter.allowedUnits = [.hour, .minute, .second]
+        formatter.zeroFormattingBehavior = .dropAll
+        return formatter
+    }()
 }
 
+
+extension MasterViewController {
+
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        self.dismiss(animated: true, completion: nil)
+    }
+
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
+        guard let originalURL = info[UIImagePickerControllerReferenceURL] as? URL,
+              let asset = PHAsset.fetchAssets(withALAssetURLs: [originalURL], options: nil).firstObject
+        else {
+            return
+        }
+        print("\(asset)")
+        self.dismiss(animated: true) { 
+            self.startExportOf(asset: asset)
+        }
+    }
+}

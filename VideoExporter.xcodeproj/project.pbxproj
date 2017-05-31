@@ -13,6 +13,9 @@
 		FF20D65E1EDCC2AF00294B78 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FF20D65C1EDCC2AF00294B78 /* Main.storyboard */; };
 		FF20D6601EDCC2AF00294B78 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FF20D65F1EDCC2AF00294B78 /* Assets.xcassets */; };
 		FF20D6631EDCC2AF00294B78 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FF20D6611EDCC2AF00294B78 /* LaunchScreen.storyboard */; };
+		FF7691571EDD78EE00713F4B /* VideoExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF7691561EDD78EE00713F4B /* VideoExporter.swift */; };
+		FF7691591EDD7BA900713F4B /* URL+Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF7691581EDD7BA900713F4B /* URL+Helpers.swift */; };
+		FF76915B1EDDA53300713F4B /* PHAsset+Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF76915A1EDDA53300713F4B /* PHAsset+Helpers.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +27,11 @@
 		FF20D65F1EDCC2AF00294B78 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		FF20D6621EDCC2AF00294B78 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		FF20D6641EDCC2AF00294B78 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		FF7691561EDD78EE00713F4B /* VideoExporter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VideoExporter.swift; sourceTree = "<group>"; };
+		FF7691581EDD7BA900713F4B /* URL+Helpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "URL+Helpers.swift"; sourceTree = "<group>"; };
+		FF76915A1EDDA53300713F4B /* PHAsset+Helpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "PHAsset+Helpers.swift"; sourceTree = "<group>"; };
+		FF76915C1EDF384100713F4B /* LICENSE.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
+		FF76915D1EDF384100713F4B /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -40,6 +48,8 @@
 		FF20D64A1EDCC2AF00294B78 = {
 			isa = PBXGroup;
 			children = (
+				FF76915C1EDF384100713F4B /* LICENSE.txt */,
+				FF76915D1EDF384100713F4B /* README.md */,
 				FF20D6551EDCC2AF00294B78 /* VideoExporter */,
 				FF20D6541EDCC2AF00294B78 /* Products */,
 			);
@@ -63,6 +73,9 @@
 				FF20D65F1EDCC2AF00294B78 /* Assets.xcassets */,
 				FF20D6611EDCC2AF00294B78 /* LaunchScreen.storyboard */,
 				FF20D6641EDCC2AF00294B78 /* Info.plist */,
+				FF7691561EDD78EE00713F4B /* VideoExporter.swift */,
+				FF7691581EDD7BA900713F4B /* URL+Helpers.swift */,
+				FF76915A1EDDA53300713F4B /* PHAsset+Helpers.swift */,
 			);
 			path = VideoExporter;
 			sourceTree = "<group>";
@@ -99,6 +112,7 @@
 				TargetAttributes = {
 					FF20D6521EDCC2AF00294B78 = {
 						CreatedOnToolsVersion = 8.3.2;
+						DevelopmentTeam = PZYM8XX95Q;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -140,7 +154,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				FF20D65B1EDCC2AF00294B78 /* DetailViewController.swift in Sources */,
+				FF7691591EDD7BA900713F4B /* URL+Helpers.swift in Sources */,
+				FF76915B1EDDA53300713F4B /* PHAsset+Helpers.swift in Sources */,
 				FF20D6591EDCC2AF00294B78 /* MasterViewController.swift in Sources */,
+				FF7691571EDD78EE00713F4B /* VideoExporter.swift in Sources */,
 				FF20D6571EDCC2AF00294B78 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -266,6 +283,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = PZYM8XX95Q;
 				INFOPLIST_FILE = VideoExporter/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.sergioestevao.VideoExporter;
@@ -278,6 +296,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = PZYM8XX95Q;
 				INFOPLIST_FILE = VideoExporter/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.sergioestevao.VideoExporter;
@@ -305,6 +324,7 @@
 				FF20D6691EDCC2AF00294B78 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

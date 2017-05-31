@@ -1,11 +1,3 @@
-//
-//  DetailViewController.swift
-//  VideoExporter
-//
-//  Created by Sergio Estevao on 29/05/2017.
-//  Copyright © 2017 Sergio Estevao. All rights reserved.
-//
-
 import UIKit
 
 class DetailViewController: UIViewController {
@@ -33,7 +25,7 @@ class DetailViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
 
-    var detailItem: NSDate? {
+    var detailItem: VideoExporter? {
         didSet {
             // Update the view.
             configureView()
