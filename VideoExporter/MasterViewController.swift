@@ -72,14 +72,16 @@ class MasterViewController: UITableViewController, UIImagePickerControllerDelega
         text += " " + object.status
         text += " \(percentFormatter.string(from:NSNumber(value: object.progress))!)"
         var detail: String = ""
-        if let fileSize = object.resultFileSize {
-            detail += "size: \(ByteCountFormatter.string(fromByteCount: fileSize.int64Value, countStyle: ByteCountFormatter.CountStyle.file)) "
-        }
-        if let pixelSize = object.resultPixelSize {
-            detail += "resolution: \(NSStringFromCGSize(pixelSize)) "
-        }
-        if object.timeToExport != 0 {
-            detail += "time: \(timeIntervalFormatter.string(from: object.timeToExport)!)"
+        if (object.progress == 1) {
+            if let fileSize = object.resultFileSize {
+                detail += "size: \(ByteCountFormatter.string(fromByteCount: fileSize.int64Value, countStyle: ByteCountFormatter.CountStyle.file)) "
+            }
+            if let pixelSize = object.resultPixelSize {
+                detail += "resolution: \(NSStringFromCGSize(pixelSize)) "
+            }
+            if object.timeToExport != 0 {
+                detail += "time: \(timeIntervalFormatter.string(from: object.timeToExport)!)"
+            }
         }
         cell.textLabel!.text = text
         cell.detailTextLabel!.text = detail
